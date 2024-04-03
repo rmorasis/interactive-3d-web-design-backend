@@ -1,4 +1,6 @@
 const userDB = require('../models/userModel');
+const scoreDB = require('../models/scoreModel');
+
 
 const deleteUserById = async (req, res) => {
   const userName = req.params.username; 
@@ -7,7 +9,7 @@ const deleteUserById = async (req, res) => {
   try {
     const deletedUser = await userDB.findByIdAndDelete(existingUser);
 
-    if (!deletedUser) {
+    if (!deletedUser && !deletedUserScore) {
       res.status(400).json(
         {
           "status": "error",
@@ -19,6 +21,9 @@ const deleteUserById = async (req, res) => {
         }
       );
     } else {
+    // At this point userDB is deleted. So, delete the user ScoreDB as well.
+    const existingUserScore = await scoreDB.findOne({userName: userName});
+    const deletedUserScore = await scoreDB.findByIdAndDelete(existingUserScore);
       res.status(204).json(
         {
           "status": "success",
